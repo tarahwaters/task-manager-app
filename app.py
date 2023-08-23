@@ -16,7 +16,8 @@ mongo = PyMongo(app)
 
 
 @app.route("/")
-def hello():
+@app.route("/get_tasks")
+def get_tasks():
     return "Hello World ... again!"
 
 
