@@ -22,6 +22,7 @@ mongo = PyMongo(app)
 @app.route("/get_tasks")
 def get_tasks():
     tasks = list(mongo.db.tasks.find())
+    print(tasks)
     return render_template("tasks.html", tasks=tasks)
 
 
@@ -121,18 +122,18 @@ def add_task():
 def edit_task(task_id):
     if request.method == "POST":
         is_urgent = "on" if request.form.get("is_urgent") else "off"
-        submit = {
-            "category_name": request.form.get("category_name"),
-            "task_name": request.form.get("task_name"),
-            "task_description": request.form.get("task_description"),
-            "is_urgent": is_urgent,
-            "due_date": request.form.get("due_date"),
-            "created_by": session["user"]
-        }
-        task_id = ObjectId(task_id)
-        mongo.db.tasks.update_one({"_id": task_id}, {"$set": submit})
+        mongo.db.tasks.update_one(
+            {"_id": ObjectId(task_id)}, {
+                    '$set': {
+                        "category_name": request.form.get("category_name"),
+                        "task_name": request.form.get("task_name"),
+                        "task_description": request.form.get("task_description"),
+                        "is_urgent": is_urgent,
+                        "due_date": request.form.get("due_date"),
+                        "created_by": session["user"]
+                    }
+            })
         flash("Task Successfully Updated")
-
     task = mongo.db.tasks.find_one({"_id": ObjectId(task_id)})
     categories = mongo.db.categories.find().sort("category_name", 1)
     return render_template("edit_task.html", task=task, categories=categories)
